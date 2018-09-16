@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Advanced Bookmarks Storage
+{% endblock %}
+
+{% block links %}
+<li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('login') }}">Log In <span class="sr-only">(current)</span></a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
+</li>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{url_for('.static', filename='main.css')}}">
+{% endblock %}
+
+{% block content %}
+    <h1>Advanced Bookmarks Storage</h1>
+    
+    <div class='message'>
+        {{text | safe}} 
+   </div>
+{% endblock %}

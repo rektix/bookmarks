@@ -1,0 +1,14 @@
+body {
+    background-color: #5681c7;
+    color: #e3eaf4;
+}
+
+.forms {
+    width: 50%;
+    min-width: 400px;
+    margin: auto;
+}
+
+.login {
+    width: 20%;
+}

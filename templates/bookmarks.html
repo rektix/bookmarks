@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{url_for('.static', filename='main.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='bookmarks.css')}}">
+<script type="text/javascript" src="{{url_for('static', filename='bookmarks.js')}}"></script>
+{% endblock %}
+
+{% block links %}
+
+<li class="nav-item active">    
+    <a class="nav-link" href="{{ url_for('logout') }}">Log Out </a>
+</li>
+
+{% endblock %}
+
+{% block content %}
+    <h1 class='message'>
+        {{name | safe}}'s bookmarks
+    </h1>
+    <h3>
+        {{text | safe}}
+    </h3>
+    <div class="forms">
+        <div id="searchbar">            
+            <form action="{{url_for('search')}}" method="post">
+                {{ search.hidden_tag() }}
+                {{ wtf.form_field(search.search_term)}}
+                <button type="submit" class="btn btn-light search"><i class="fa fa-search" aria-hidden="true"></i></button>
+            </form>           
+        </div>
+        <div id="add-folder"class="hidden form">
+        <h3>Add Folder</h3>
+            <form action="{{url_for('add_folder')}}" method="post">
+                {{ form_folder.hidden_tag() }}
+                {{ wtf.form_field(form_folder.folder_name) }}
+                {{ wtf.form_field(form_folder.folder_parent_folder) }}
+                <button type="submit" class="btn btn-success">Add folder</button>
+                <button type="button" class="btn btn-secondary" onclick="hideAll()">Cancel</button>
+            </form>
+            
+        </div>
+        <div id="update-folder"class="hidden form">
+            <h3>Edit Folder</h3>
+            <form action="{{url_for('update_folder')}}" method="post">
+                {{ update_folder.hidden_tag() }}
+                {{ wtf.form_field(update_folder.folder_name_update) }}
+                {{ wtf.form_field(update_folder.folder_parent_folder_update) }}
+                <div class="hidden">
+                    {{ wtf.form_field(update_folder.folder_id_update)}}
+                </div>
+                <br>
+                <button type="submit" class="btn btn-warning">Edit folder</button>
+                <button type="button" class="btn btn-secondary" onclick="hideAll()">Cancel</button>
+            </form>
+        </div>
+        <div id="add-bookmark" class="hidden form">
+            <h3>Add bookmark</h3>
+            <form action="{{url_for('add_bookmark')}}" method="post">
+                {{ form_bookmark.hidden_tag() }}
+                {{ wtf.form_field(form_bookmark.bookmark_name) }}
+                {{ wtf.form_field(form_bookmark.bookmark_parent_folder) }}
+                {{ wtf.form_field(form_bookmark.link) }}
+                {{ wtf.form_field(form_bookmark.description) }}
+                <button type="submit" class="btn btn-success">Add bookmark</button>
+                <button type="button" class="btn btn-secondary" onclick="hideAll()">Cancel</button>
+            </form>
+        </div>
+        <div id="update-bookmark" class="hidden form">
+            <h3>Edit bookmark</h3>
+            <form action="{{url_for('update_bookmark')}}" method="post">
+                {{ update_bookmark.hidden_tag() }}
+                {{ wtf.form_field(update_bookmark.bookmark_name_update) }}
+                {{ wtf.form_field(update_bookmark.bookmark_parent_folder_update) }}
+                {{ wtf.form_field(update_bookmark.link_update) }}
+                {{ wtf.form_field(update_bookmark.description_update) }}
+                <div class="hidden">
+                    {{ wtf.form_field(update_bookmark.bookmark_id_update)}}
+                </div>
+                <br>
+                <button type="submit" class="btn btn-warning">Edit bookmark</button>
+                <button type="button" class="btn btn-secondary" onclick="hideAll()">Cancel</button>
+            </form>
+        </div>
+        <div id="remove-folder" class="hidden form">
+            <form action="{{url_for('remove_folder')}}" method="post">
+                <p>Are you sure?</p>
+                <div class="hidden">
+                    {{ delete_folder.hidden_tag() }}
+                    {{ wtf.form_field(delete_folder.folder_id)}}
+                </div>
+                <button type="submit" class="btn btn-danger">Delete</button>  
+                <button type="button" class="btn btn-secondary" onclick="hideAll()">Cancel</button>          
+            </form>
+        </div>
+        <div id="remove-bookmark" class="hidden form">
+            <form action="{{url_for('remove_bookmark')}}" method="post">
+                <p>Are you sure?</p>
+                <div class="hidden">
+                    {{ delete_bookmark.hidden_tag() }}
+                    {{ wtf.form_field(delete_bookmark.bookmark_id)}}
+                </div>
+                <button type="submit" class="btn btn-danger">Delete</button> 
+                <button type="button" class="btn btn-secondary" onclick="hideAll()">Cancel</button>           
+            </form>
+        </div>
+    </div>
+    <div class="bookmarks">
+        {% set prev_prefix = {'value':0} %}
+        {% set prev_type = {'value':'bookmark'} %}
+        {% for entry in entries %}
+        {% if prev_prefix.value >= entry.prefix|length %}
+                    {% if prev_type.value == 'bookmark' %}
+                        {% for i in range(prev_prefix.value - entry.prefix|length) %}
+                            </div>
+                        {% endfor %} 
+                    {% else %}
+                        {% for i in range(prev_prefix.value - entry.prefix|length + 1) %}
+                            </div>
+                        {% endfor %}                      
+                    {% endif %}
+                {% endif %}
+            {% if entry.type == 'folder' %}   
+                
+                
+                <div class="folder">
+                    <p class="name">{{entry.name}}</p>                    
+                    <button value = {{entry.id}} class='add-folder-btn btn btn-info' onclick="addFolder(this.value)"><i class="fa fa-plus" aria-hidden="true"></i> <i class="fa fa-folder-open" aria-hidden="true"></i></button>
+                    <button value = {{entry.id}} class='add-bookmark-btn btn btn-primary' onclick="addBookmark(this.value)"><i class="fa fa-plus" aria-hidden="true"></i> <i class="fa fa-bookmark" aria-hidden="true"></i></button>
+                    {% if entry.prefix != '-' %}                        
+                        <button class='edit-folder-btn btn btn-warning' onclick="editFolder('{{entry.id}}','{{entry.name}}','{{entry.parent_folder_id}}')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+                        <button value = {{entry.id}} class='remove-folder-btn btn btn-danger' onclick="removeFolder(this.value)"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                    {% endif %}      
+                    <button class='btn btn-info show'><i class="fas fa-chevron-down"></i></button>                                    
+            {% else %}
+                <div class="bookmark">
+                    <a href="{{entry.link}}" class="name">{{entry.name}}</a>                    
+                    <button class='edit-bookmark-btn btn btn-warning' onclick="editBookmark('{{entry.id}}','{{entry.name}}','{{entry.parent_folder_id}}','{{entry.link}}','{{entry.description}}')"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+                    <button value = {{entry.id}} class='remove-bookmark-btn btn btn-danger' onclick="removeBookmark(this.value)"><i class="fa fa-trash" aria-hidden="true"></i></button>                    
+                    <p class="description">{{entry.description}}</p>
+                </div>                
+            {% endif %}
+            {% if prev_prefix.update({'value':entry.prefix|length}) %}  {% endif %}
+            {% if prev_type.update({'value':entry.type}) %}  {% endif %}
+        {% endfor %}
+        {% for i in range(prev_prefix.value) %}
+            </div>
+        {% endfor %}
+    </div>
+    <div id="cover"></div>    
+{% endblock %}
